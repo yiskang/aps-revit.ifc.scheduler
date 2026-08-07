@@ -81,10 +81,5 @@ namespace RevitToIfcScheduler.Utilities
                 return false;
             }
         }
-
-        public static bool IsAuthorized(HttpContext httpsContext, string projectId)
-        {
-            return true;
-        }
     }
 }
