@@ -97,10 +97,15 @@ namespace RevitToIfcScheduler.Controllers
             {
                 if (!Authentication.IsAuthorized(HttpContext, RevitIfcContext, new List<AccountRole>() { AccountRole.AccountAdmin, AccountRole.ApplicationAdmin })) return Unauthorized();
 
-                var path = Path.Combine(this.LogFolderFullPath, fileName);
+                if (Path.GetFileName(fileName) != fileName || !string.Equals(Path.GetExtension(fileName), ".txt", StringComparison.OrdinalIgnoreCase)) return BadRequest("Invalid log file name");
+
+                var logDir = Path.GetFullPath(this.LogFolderFullPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                var candidate = Path.GetFullPath(Path.Combine(logDir, fileName));
+                var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+                if (!candidate.StartsWith(logDir, comparison)) return BadRequest("Invalid log file name");
 
                 //FileStream necessary as the latest file is currently being used by the logger
-                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var fs = new FileStream(candidate, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     using (var sr = new StreamReader(fs, Encoding.Default))
                     {
