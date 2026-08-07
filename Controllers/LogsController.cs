@@ -82,7 +82,7 @@ namespace RevitToIfcScheduler.Controllers
             catch (Exception ex)
             {
                 Log.Error($"Could not retrieve logs: {ex}", this.GetType().FullName);
-                return BadRequest(ex);
+                return BadRequest("Could not retrieve logs");
             }
         }
 
@@ -117,7 +117,7 @@ namespace RevitToIfcScheduler.Controllers
             catch (Exception ex)
             {
                 Log.Error($"Could not retrieve single log: {ex}", this.GetType().FullName);
-                return BadRequest(ex);
+                return BadRequest("Could not retrieve log");
             }
         }
     }
