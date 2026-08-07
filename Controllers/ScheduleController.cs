@@ -82,7 +82,7 @@ namespace RevitToIfcScheduler.Controllers
                 {
                     HubId = account.HubId,
                     Region = account.Region,
-                    ProjectId = newItem.ProjectId,
+                    ProjectId = projectId,
                     Name = newItem.Name,
                     Cron = newItem.Cron,
                     TimeZoneId = newItem.TimeZoneId,
@@ -132,7 +132,8 @@ namespace RevitToIfcScheduler.Controllers
             {
                 if (!Authentication.IsAuthorized(HttpContext, RevitIfcContext, new List<AccountRole>(){AccountRole.AccountAdmin, AccountRole.ProjectAdmin, AccountRole.ApplicationAdmin}, projectId)) return Unauthorized();
                 var user = RevitToIfcScheduler.Models.User.FetchByContext(HttpContext, RevitIfcContext);
-                var item = await RevitIfcContext.Schedules.FindAsync(id);
+                var item = await RevitIfcContext.Schedules
+                    .FirstOrDefaultAsync(x => x.Id == id && x.ProjectId == projectId);
                 if (item == null) return NotFound(id);
 
                 item.EditedBy = user.Email;
@@ -206,9 +207,10 @@ namespace RevitToIfcScheduler.Controllers
             try
             {
                 if (!Authentication.IsAuthorized(HttpContext, RevitIfcContext, new List<AccountRole>(){AccountRole.AccountAdmin, AccountRole.ProjectAdmin, AccountRole.ApplicationAdmin}, projectId)) return Unauthorized();
-                var item = await RevitIfcContext.Schedules.FindAsync(id);
+                var item = await RevitIfcContext.Schedules
+                    .FirstOrDefaultAsync(x => x.Id == id && x.ProjectId == projectId);
                 if (item == null) return NotFound(id);
-                
+
                 //Set connected job schedules to null, and add a note
                 var scheduleConversions = (await RevitIfcContext.ConversionJobs
                         .Where(x => x.JobSchedule == item)
