@@ -189,7 +189,7 @@ namespace RevitToIfcScheduler
 
             app.UseHangfireDashboard("/hangfire", new DashboardOptions()
             {
-                Authorization = new []{ new MyAuthorizationFilter() },
+                Authorization = new []{ new HangfireAdminAuthorizationFilter() },
                 AppPath = "/settings"
             });
 
@@ -225,14 +225,17 @@ namespace RevitToIfcScheduler
             BackgroundJob.Enqueue(()=>APS.CheckOrCreateTransientBucket(AppConfig.BucketKey));
         }
     }
-    public class MyAuthorizationFilter : IDashboardAuthorizationFilter
+    public class HangfireAdminAuthorizationFilter : IDashboardAuthorizationFilter
     {
         public bool Authorize(DashboardContext context)
         {
             ServiceProvider provider = (AppConfig.Services as ServiceCollection).BuildServiceProvider();
             Context.RevitIfcContext dbRevitIfcContext = provider.GetService<Context.RevitIfcContext>();
-            
-            return Authentication.IsAuthorized(context.GetHttpContext(), dbRevitIfcContext);
+
+            return Authentication.IsAuthorized(
+                context.GetHttpContext(),
+                dbRevitIfcContext,
+                new List<AccountRole>() { AccountRole.ApplicationAdmin });
         }
     }
 }
